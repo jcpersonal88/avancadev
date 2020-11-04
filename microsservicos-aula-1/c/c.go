@@ -3,8 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 type Coupon struct {
@@ -22,18 +26,19 @@ func (c Coupons) Check(code string) string {
 		}
 	}
 	return "invalid"
+
 }
 
 type Result struct {
-	Status string
+	Status     string
+	PcDesconto int
 }
 
 var coupons Coupons
 
 func main() {
 	coupon := Coupon{
-		Code: "abc",
-	}
+		Code: "abc"}
 
 	coupons.Coupon = append(coupons.Coupon, coupon)
 
@@ -45,7 +50,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 	coupon := r.PostFormValue("coupon")
 	valid := coupons.Check(coupon)
 
-	result := Result{Status: valid}
+	result := Result{Status: valid, PcDesconto: 0}
+
+	//Busca o percentual de descontos se o coupon for valido
+	if valid == "valid" {
+
+		result2 := makeHttpCall("http://localhost:9093", r.FormValue("coupon"))
+		result.PcDesconto = result2.PcDesconto
+
+	}
 
 	jsonResult, err := json.Marshal(result)
 	if err != nil {
@@ -53,5 +66,34 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, string(jsonResult))
+
+}
+
+func makeHttpCall(urlMicroservice string, coupon string) Result {
+
+	values := url.Values{}
+	values.Add("coupon", coupon)
+
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = 5
+
+	res, err := retryClient.PostForm(urlMicroservice, values)
+	if err != nil {
+		result := Result{Status: "Servidor fora do ar!", PcDesconto: 0}
+		return result
+	}
+
+	defer res.Body.Close()
+
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatal("Error processing result")
+	}
+
+	result := Result{}
+
+	json.Unmarshal(data, &result)
+
+	return result
 
 }

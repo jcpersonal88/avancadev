@@ -2,16 +2,18 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/hashicorp/go-retryablehttp"
 	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 type Result struct {
-	Status string
+	Status     string
+	PcDesconto int
 }
 
 func main() {
@@ -44,7 +46,7 @@ func makeHttpCall(urlMicroservice string, coupon string, ccNumber string) Result
 
 	res, err := retryClient.PostForm(urlMicroservice, values)
 	if err != nil {
-		result := Result{Status: "Servidor fora do ar!"}
+		result := Result{Status: "Servidor fora do ar!", PcDesconto: 0}
 		return result
 	}
 

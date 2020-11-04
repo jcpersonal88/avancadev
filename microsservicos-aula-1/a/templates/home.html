@@ -86,7 +86,8 @@
             </div>
         </form>
     {{ else}}
-        <h4>Resultado da operação: {{ .Status }}</h4>
+    <h4>Resultado da operação: {{ .Status }}</h4>
+    <h4>Percentual de desconto: {{ .PcDesconto }}</h4>
     {{end}}
 
     <footer class="my-5 pt-5 text-muted text-center text-small">
