@@ -9,8 +9,10 @@ import (
 	"net/url"
 )
 
+// Result - Retorno do resultado da chamada http
 type Result struct {
-	Status string
+	Status     string
+	PcDesconto int
 }
 
 func main() {
@@ -22,9 +24,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 	coupon := r.PostFormValue("coupon")
 	ccNumber := r.PostFormValue("ccNumber")
 
-	resultCoupon := makeHttpCall("http://localhost:9092", coupon)
+	resultCoupon := makeHTTPCall("http://localhost:9092", coupon)
 
-	result := Result{Status: "declined"}
+	result := Result{Status: "declined", PcDesconto: resultCoupon.PcDesconto}
 
 	if ccNumber == "1" {
 		result.Status = "approved"
@@ -40,10 +42,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, string(jsonData))
+
 }
 
-
-func makeHttpCall(urlMicroservice string, coupon string) Result {
+func makeHTTPCall(urlMicroservice string, coupon string) Result {
 
 	values := url.Values{}
 	values.Add("coupon", coupon)
