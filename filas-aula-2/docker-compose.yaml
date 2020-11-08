@@ -12,3 +12,17 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+  microservicoa:
+    image: docker.io/jcpersonal/microservico-avancadev-a
+    ports:
+      - 9090
+  microservicob:
+    depends_on:
+      - "rabbit"
+    image: docker.io/jcpersonal/microservico-avancadev-b
+    ports:
+      - 9091
+  microservicoc:
+    image: docker.io/jcpersonal/microservico-avancadev-c
+    ports:
+      - 9092      
