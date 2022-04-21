@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM golang:bullseye
 
 WORKDIR /go/src/fullcycle
 
