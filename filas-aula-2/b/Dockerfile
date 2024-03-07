@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM golang:bookworm
 
 WORKDIR /go/src/fullcycle
 
